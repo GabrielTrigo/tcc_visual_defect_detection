@@ -7,7 +7,8 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids, Data.DB,
   Datasnap.DBClient, Vcl.DBGrids, Datasnap.Provider, StrUtils, IdBaseComponent,
   Vcl.ExtCtrls, Winapi.ShellAPI, System.Diagnostics, System.TypInfo,
-  System.IOUtils;
+  System.IOUtils, IdComponent, IdTCPConnection, IdTCPClient, IdHTTP,
+  pngimage, jpeg;
 
 type
   TProcessOutput = record
@@ -32,13 +33,17 @@ type
     ClientDataSet1confidence: TStringField;
     Button3: TButton;
     ClientDataSet1guid: TStringField;
+    IdHTTP1: TIdHTTP;
+    ImgInput: TImage;
+    ImgOutput: TImage;
+    Label1: TLabel;
+    Label2: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
       DataCol: Integer; Column: TColumn; State: TGridDrawState);
     procedure Button2Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
-    procedure Button4Click(Sender: TObject);
   private
     function FormatOutputData(AFilePath: String): TProcessOutput;
     function DetectImage(AImagePath: string): String;
@@ -224,6 +229,8 @@ begin
 
   while not ClientDataSet1.Eof do
   begin
+    ImgInput.Picture.LoadFromFile(ClientDataSet1.FieldByName('file_path').AsString);
+
     ClientDataSet1.Edit();
 
     ClientDataSet1.FieldByName('status').AsString := ProcessStatusToStr(psRunning);
@@ -239,6 +246,9 @@ begin
       ClientDataSet1.Post();
       ClientDataSet1.Next();
       Application.ProcessMessages();
+
+      IdHTTP1.Get('http://192.168.0.227/broken');
+
       Continue;
     end;
 
@@ -255,9 +265,16 @@ begin
 
     ClientDataSet1.FieldByName('guid').AsString := GetGUIDFromFile(lOutputFilePath);
 
+    ImgOutput.Picture.LoadFromFile(GetOutputImagePathFromGUID(ClientDataSet1.FieldByName('guid').AsString));
+
     ClientDataSet1.Post();
     ClientDataSet1.Next();
     Application.ProcessMessages();
+
+    if lProcessOutput.ClassName = 'broken'  then
+      IdHTTP1.Get('http://192.168.0.227/broken')
+    else
+      Sleep(500);
   end;
 end;
 
@@ -309,11 +326,6 @@ begin
   TFile.WriteAllText('last_report.html', lHtml.Replace('{{items}}', lItemsSnippet));
 //
   ShellExecute(Handle, nil, PChar('last_report.html'), nil,  nil, SW_SHOWNORMAL);
-end;
-
-procedure TForm5.Button4Click(Sender: TObject);
-begin
-  //
 end;
 
 procedure TForm5.DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
