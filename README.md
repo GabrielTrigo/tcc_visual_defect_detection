@@ -16,4 +16,7 @@ Necessário Python na versão 3.10.x. [Download](https://www.python.org/download
 
 ## Demo
 
-[Demo 1](https://github.com/GabrielTrigo/tcc_visual_defect_detection/blob/main/media/demo1.mp4)
+<img src="https://github.com/GabrielTrigo/tcc_visual_defect_detection/assets/43503837/8cf75a95-7141-4b15-afb3-b0148759c37c" width="320">
+
+
+[Video Demo 1](https://github.com/GabrielTrigo/tcc_visual_defect_detection/blob/main/media/demo1.mp4)
