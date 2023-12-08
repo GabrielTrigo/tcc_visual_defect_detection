@@ -6,8 +6,8 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids, Data.DB,
   Datasnap.DBClient, Vcl.DBGrids, Datasnap.Provider, StrUtils, IdBaseComponent,
-  Vcl.ExtCtrls, Winapi.ShellAPI, System.Diagnostics, System.TypInfo, pngimage,
-  System.Generics.Collections;
+  Vcl.ExtCtrls, Winapi.ShellAPI, System.Diagnostics, System.TypInfo,
+  System.IOUtils;
 
 type
   TProcessOutput = record
@@ -37,10 +37,9 @@ type
     procedure DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
       DataCol: Integer; Column: TColumn; State: TGridDrawState);
     procedure Button2Click(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
     procedure Button3Click(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
   private
-    FLastGUIDsList: TList<string>;
     function FormatOutputData(AFilePath: String): TProcessOutput;
     function DetectImage(AImagePath: string): String;
     { Private declarations }
@@ -72,6 +71,12 @@ function GetOutputImagePathFromGUID(AGUID: string): string;
 begin
   Result := ExpandFileName(GetCurrentDir() + PathDelim +
       Format('..\segmented_images\%s_segmented.png', [AGUID]));
+end;
+
+function GetOutputLogPathFromGUID(AGUID: string): string;
+begin
+  Result := ExpandFileName(GetCurrentDir() + PathDelim +
+      Format('%s.txt', [AGUID]));
 end;
 
 function GetGUIDFromFile(AFile: string): string;
@@ -146,7 +151,6 @@ begin
   lDefaultPath := GetCurrentDir();
   try
     lProcessGUID := GUIDToString(TGUID.NewGuid()).Replace('{', '').Replace('}', '');
-    FLastGUIDsList.Add(lProcessGUID);
 
     SetCurrentDir(ExpandFileName(lDefaultPath + PathDelim + '..\ai_python_yolov8'));
 
@@ -216,7 +220,6 @@ var
   lStatus: String;
   lProcessOutput: TProcessOutput;
 begin
-  FLastGUIDsList.Clear();
   ClientDataSet1.First();
 
   while not ClientDataSet1.Eof do
@@ -260,14 +263,57 @@ end;
 
 procedure TForm5.Button3Click(Sender: TObject);
 var
-  lGUID: string;
+  lGUID, lHtml, lItemsSnippet, lOutputImagePath: string;
 begin
+  lHtml := TFile.ReadAllText('template_report.html');
+  lItemsSnippet := EmptyStr;
+
   ClientDataSet1.First();
 
   while not ClientDataSet1.Eof do
   begin
+    lGUID := ClientDataSet1.FieldByName('guid').AsString;
+    lOutputImagePath := GetOutputImagePathFromGUID(lGUID);
+
+    lItemsSnippet := lItemsSnippet +
+      Format('<div class="flex gap-1 item items-center"> ' +
+      '  <img src="%s"> ' +
+      '  <div> ' +
+      '    <p>File Name: %s</p> ' +
+      '    <p>Status: %s</p> ' +
+      '    <p>Confidence: %s</p> ' +
+      '    <p>Class Name: %s</p> ' +
+      '    <p>Original Image Path: %s</p> ' +
+      '    <p>Output Image Path: %s</p> ' +
+      '    <p>Log Path: %s</p> ' +
+      '  </div> ' +
+      '</div>',
+      [
+        lOutputImagePath,
+        ClientDataSet1.FieldByName('file_name').AsString,
+        IfThen(StrToProcessStatus(ClientDataSet1.FieldByName('status').AsString) =
+          psFailed,
+          '<span style="color: red">FAILED</span>',
+          '<span style="color: green">COMPLETE</span>'),
+        ClientDataSet1.FieldByName('confidence').AsString,
+        ClientDataSet1.FieldByName('class_name').AsString,
+
+        Format('<code>%s</code>', [ClientDataSet1.FieldByName('file_path').AsString]),
+        Format('<code>%s</code>', [lOutputImagePath]),
+        Format('<code>%s</code>', [GetOutputLogPathFromGUID(lGUID)])
+      ]);
+
     ClientDataSet1.Next();
   end;
+
+  TFile.WriteAllText('last_report.html', lHtml.Replace('{{items}}', lItemsSnippet));
+//
+  ShellExecute(Handle, nil, PChar('last_report.html'), nil,  nil, SW_SHOWNORMAL);
+end;
+
+procedure TForm5.Button4Click(Sender: TObject);
+begin
+  //
 end;
 
 procedure TForm5.DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
@@ -290,19 +336,11 @@ end;
 
 procedure TForm5.FormCreate(Sender: TObject);
 begin
-  FLastGUIDsList := TList<string>.Create([]);
-
   ClientDataSet1.FileName := 'data.xml';
   //ClientDataSet1.CreateDataSet();
   ClientDataSet1.Open();
 
   ClientDataSet1.EmptyDataSet();
-end;
-
-procedure TForm5.FormDestroy(Sender: TObject);
-begin
-  if Assigned(FLastGUIDsList) then
-    FreeAndNil(FLastGUIDsList);
 end;
 
 end.

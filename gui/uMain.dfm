@@ -11,23 +11,22 @@ object Form5: TForm5
   Font.Name = 'Calibri'
   Font.Style = []
   OnCreate = FormCreate
-  OnDestroy = FormDestroy
   TextHeight = 21
   object Button1: TButton
-    Left = 8
+    Left = 3
     Top = 8
-    Width = 241
+    Width = 254
     Height = 33
-    Caption = 'Select Images for inspecion'
+    Caption = '1.0 - Select Images for inspecion'
     TabOrder = 0
     OnClick = Button1Click
   end
   object DBGrid1: TDBGrid
     AlignWithMargins = True
     Left = 3
-    Top = 164
+    Top = 136
     Width = 736
-    Height = 329
+    Height = 357
     Align = alBottom
     DataSource = DataSource1
     ReadOnly = True
@@ -40,20 +39,20 @@ object Form5: TForm5
     OnDrawColumnCell = DBGrid1DrawColumnCell
   end
   object Button2: TButton
-    Left = 8
+    Left = 3
     Top = 47
-    Width = 241
+    Width = 254
     Height = 34
-    Caption = 'Start'
+    Caption = '1.1 - Start'
     TabOrder = 2
     OnClick = Button2Click
   end
   object Button3: TButton
-    Left = 8
+    Left = 3
     Top = 87
-    Width = 241
+    Width = 254
     Height = 34
-    Caption = 'Relat'#243'rio'
+    Caption = '1.2 - Report'
     TabOrder = 3
     OnClick = Button3Click
   end
@@ -76,7 +75,7 @@ object Form5: TForm5
       0049001000010005574944544802000200FF000A636F6E666964656E63650100
       4900100001000557494454480200020064000A636C6173735F6E616D65010049
       0010000100055749445448020002006400046775696401004900100001000557
-      494454480200020032000000}
+      494454480200020064000000}
     Active = True
     Aggregates = <>
     FileName = 'E:\docs\Faculdade\tcc\bin\data.xml'
@@ -115,7 +114,7 @@ object Form5: TForm5
         Name = 'guid'
         Attributes = [faUnNamed]
         DataType = ftString
-        Size = 50
+        Size = 100
       end>
     IndexDefs = <>
     Params = <>
@@ -154,6 +153,7 @@ object Form5: TForm5
     object ClientDataSet1guid: TStringField
       DisplayLabel = 'GUID'
       FieldName = 'guid'
+      Size = 100
     end
   end
 end
