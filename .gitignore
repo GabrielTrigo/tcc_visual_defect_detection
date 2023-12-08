@@ -40,6 +40,9 @@ __recovery/
 # Boss dependency manager vendor folder https://github.com/HashLoad/boss
 modules/
 
+ai_python_yolov8/__pycache__
+ai_python_yolov8/.idea
+
 ai_python_yolov8/runs/detect/predict/*.png
 segmented_images/*.png
 bin/*.txt
