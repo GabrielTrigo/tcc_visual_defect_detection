@@ -1,12 +1,3 @@
-{
-
-
-  Necessário o Python na versão 3.10.0
-  Link para donwload: https://www.python.org/downloads/release/python-3100
-
-
-}
-
 unit uMain;
 
 interface
