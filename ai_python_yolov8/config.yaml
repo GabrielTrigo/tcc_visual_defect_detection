@@ -1,0 +1,7 @@
+path: E:\temp\data
+val: train\images
+train: train\images
+
+nc: 2
+
+names: ['broken', 'good']
